@@ -13,6 +13,7 @@ RUN apt-get update -qq \
         less \
         procps \
         wget \
+        graphviz \
     && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 COPY --from=busybox /bin/sendmail /usr/sbin/
@@ -41,6 +42,7 @@ RUN install-php-extensions \
         soap-stable \
         uuid-stable \
         xdebug-3.1.6 \
+        xhprof-stable \
         zip-stable \
     && rm -rf /usr/bin/install-php-extensions /var/lib/apt/lists /var/cache/apt/archives
 
