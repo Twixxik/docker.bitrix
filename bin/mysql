@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+DIR=$(realpath $(dirname -- $(dirname -- "$0")));
+
+set -o allexport
+source ${DIR}/.env
+set +o allexport
+
+docker compose exec mysql bash /mnt/mysql/init
+

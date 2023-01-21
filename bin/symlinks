@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+DIR=$(realpath $(dirname -- $(dirname -- "$0")));
+
+printf "Creating missing symlinks... "
+
+test -e ${DIR}/website/bitrix   || ln -s ../bitrix ${DIR}/website/bitrix
+test -e ${DIR}/website/upload   || ln -s ../upload ${DIR}/website/upload
+test -e ${DIR}/website/local    || ln -s ../local  ${DIR}/website/local
+
+printf "Done.\n"

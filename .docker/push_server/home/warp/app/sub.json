@@ -1,0 +1,30 @@
+{
+  "servers": [
+    {
+      "name": "sub",
+      "port": 3000,
+      "backlog": 1024,
+      "routes": {
+        "pub": "/pub/",
+        "sub": "/sub/",
+        "stat": "/server-stat/",
+        "rest": "/rest/",
+        "register": "/register-client/",
+        "systemctl": "/systemctl/"
+      }
+    }
+  ],
+  "publishMode": false,
+  "clusterMode": true,
+  "storage": {
+    "host": "redis",
+    "type": "redis"
+  },
+  "security": {
+    "key": "WPPUD3dgJLEb9TDMa3SZ8607ajJkOeVKy000UUTpbAn0qeOTrsD0rJ7h25Kmm6kCa4hAGSxnnzX41Gw65KGPT2TtUnyqNHYbmDG1PeLcIIjmowfbv7dXiM3u0q2eZhs4"
+  },
+  "debug": {
+    "ip": ["127.0.0.1", "172.0.0.0/8"],
+    "folderName": "/tmp"
+  }
+}

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+DIR=$(realpath $(dirname -- $(dirname -- "$0")));
+
+set -o allexport
+source ${DIR}/.env
+set +o allexport
+
+echo "<?php define('NOT_CHECK_PERMISSIONS', true); require \$_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_before.php'; global \$USER; \$USER->Authorize(1); @unlink(__FILE__); LocalRedirect('/bitrix/admin/'); " > ${DIR}/website/login.php
+
+echo "Go to: http://$ROOT_DOMAIN/login.php"

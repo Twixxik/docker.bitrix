@@ -1,0 +1,86 @@
+version: '3.9'
+
+services:
+  php:
+    extra_hosts:
+      - ${ROOT_DOMAIN}:host-gateway
+
+  php-debug:
+    extra_hosts:
+      - ${ROOT_DOMAIN}:host-gateway
+
+  php-profile:
+    extra_hosts:
+      - ${ROOT_DOMAIN}:host-gateway
+
+  nginx:
+    networks:
+      - 'default'
+      - 'traefik'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.project_name-nginx.loadbalancer.server.port=80'
+      - 'traefik.http.routers.project_name-nginx.service=project_name-nginx'
+      - 'traefik.http.routers.project_name-nginx.rule=HostRegexp(`${ROOT_DOMAIN}`, `{subdomain:.*}.${ROOT_DOMAIN}`)'
+      - 'traefik.http.routers.project_name-nginx.priority=50'
+    environment:
+      FPM_SENDMAIL: /usr/sbin/sendmail -ti -S mailhog:1025
+
+  push-sub:
+    networks:
+      - 'default'
+      - 'traefik'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.project_name-push-sub.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.project_name-push-sub.service=project_name-push-sub'
+      - 'traefik.http.routers.project_name-push-sub.rule=Host(`sub.${ROOT_DOMAIN}`)'
+      - 'traefik.http.routers.project_name-push-sub.priority=100'
+
+  mailhog:
+    restart: unless-stopped
+    image: mailhog/mailhog:latest
+    networks:
+      - 'default'
+      - 'traefik'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.project_name-mailhog.loadbalancer.server.port=8025'
+      - 'traefik.http.routers.project_name-mailhog.service=project_name-mailhog'
+      - 'traefik.http.routers.project_name-mailhog.rule=Host(`mail.${ROOT_DOMAIN}`)'
+      - 'traefik.http.routers.project_name-mailhog.priority=100'
+
+  upload:
+    profiles:
+      - upload
+    restart: unless-stopped
+    image: nginx:alpine
+    volumes:
+      - type: bind
+        source: .docker/upload
+        target: /etc/nginx/templates
+      - type: bind
+        source: ./upload
+        target: /srv/upload
+    environment:
+      NGINX_ENVSUBST_TEMPLATE_SUFFIX: .tmpl
+      NGINX_ROOT: /srv
+      PROXY_ADDR: https://project_name.ru/
+    networks:
+      - 'default'
+      - 'traefik'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.project_name-upload.loadbalancer.server.port=80'
+      - 'traefik.http.routers.project_name-upload.service=project_name-upload'
+      - 'traefik.http.routers.project_name-upload.rule=HostRegexp(`${ROOT_DOMAIN}`, `{subdomain:.*}.${ROOT_DOMAIN}`) && PathPrefix(`/upload/`)'
+      - 'traefik.http.routers.project_name-upload.priority=60'
+
+  mysql:
+    ports:
+      - '49361:3306'
+
+networks:
+  traefik:
+    external: true
+    name: traefik

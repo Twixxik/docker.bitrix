@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+echo "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE; CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; GRANT ALL PRIVILEGES ON * . * TO '$MYSQL_USER'@'%'; GRANT ALL PRIVILEGES ON * . * TO '$MYSQL_USER'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;" | mysql -uroot -p$MYSQL_ROOT_PASSWORD
+
+mysql -u$MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE < /mnt/mysql/10-structure.sql
+mysql -u$MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE < /mnt/mysql/20-data.sql
+

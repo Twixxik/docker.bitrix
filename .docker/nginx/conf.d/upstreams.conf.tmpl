@@ -1,0 +1,18 @@
+upstream php-upstream {
+    server unix:/var/run/php/php-fpm.sock;
+}
+
+upstream php-debug-upstream {
+    server unix:/var/run/php-debug/php-fpm.sock;
+    server unix:/var/run/php/php-fpm.sock backup;
+}
+
+upstream php-profile-upstream {
+    server unix:/var/run/php-profile/php-fpm.sock;
+    server unix:/var/run/php/php-fpm.sock backup;
+}
+
+upstream php-trace-upstream {
+    server unix:/var/run/php-trace/php-fpm.sock;
+    server unix:/var/run/php/php-fpm.sock backup;
+}

@@ -1,0 +1,6 @@
+include             fastcgi_params;
+fastcgi_param       DOCUMENT_ROOT    $fpm_root;
+fastcgi_param       SERVER_NAME      $host;
+fastcgi_param       PHP_ADMIN_VALUE  "sendmail_path = ${FPM_SENDMAIL}";
+fastcgi_buffers     8                16k;
+fastcgi_buffer_size 16k;

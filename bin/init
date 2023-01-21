@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+DIR=$(realpath $(dirname -- $(dirname -- "$0")));
+
+read -p "Specify git repository clone link: " repository
+read -p "Specify branch: " branch
+
+echo "Cloning git repository... "
+git clone ${repository} --branch ${branch} ${DIR}/website
+echo "Done."
+
+mkdir bitrix upload
+
+docker run --rm --user $UID -v ${DIR}/website:/app composer:2 i --ignore-platform-reqs --prefer-dist

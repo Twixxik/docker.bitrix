@@ -1,0 +1,202 @@
+version: '3.9'
+
+services:
+  php:
+    restart: unless-stopped
+    image: bitrix_php:latest
+    build:
+      context: .docker
+      target: php_fpm
+    volumes:
+      - type: bind
+        source: .volumes/php-socket
+        target: /var/run/php
+      - type: bind
+        source: .
+        target: /home/warp/app
+      - type: volume
+        source: php-tmp
+        target: /tmp
+    env_file:
+      - .env
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  php-debug:
+    profiles:
+      - debug
+    restart: unless-stopped
+    image: bitrix_php:latest
+    build:
+      context: .docker
+      target: php_fpm
+    volumes:
+      - type: bind
+        source: .volumes/php-socket-debug
+        target: /var/run/php
+      - type: bind
+        source: .
+        target: /home/warp/app
+      - type: volume
+        source: php-tmp
+        target: /tmp
+    env_file:
+      - .env
+    environment:
+      XDEBUG_CONFIG: log_level=0 idekey=docker
+      XDEBUG_TRIGGER: docker
+      XDEBUG_MODE: debug
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  php-profile:
+    profiles:
+      - debug
+    restart: unless-stopped
+    image: bitrix_php:latest
+    build:
+      context: .docker
+      target: php_fpm
+    volumes:
+      - type: bind
+        source: .volumes/php-socket-profile
+        target: /var/run/php
+      - type: bind
+        source: .
+        target: /home/warp/app
+      - type: volume
+        source: php-tmp
+        target: /tmp
+    env_file:
+      - .env
+    environment:
+      XDEBUG_CONFIG: log_level=0 idekey=docker
+      XDEBUG_TRIGGER: docker
+      XDEBUG_MODE: profile
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  php-trace:
+    profiles:
+      - debug
+    restart: unless-stopped
+    image: bitrix_php:latest
+    build:
+      context: .docker
+      target: php_fpm
+    volumes:
+      - type: bind
+        source: .volumes/php-socket-trace
+        target: /var/run/php
+      - type: bind
+        source: .
+        target: /home/warp/app
+      - type: volume
+        source: php-tmp
+        target: /tmp
+    env_file:
+      - .env
+    environment:
+      XDEBUG_CONFIG: log_level=0 idekey=docker
+      XDEBUG_TRIGGER: docker
+      XDEBUG_MODE: trace
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  nginx:
+    restart: unless-stopped
+    image: nginx:alpine
+    volumes:
+      - type: bind
+        source: .volumes/php-socket
+        target: /var/run/php
+      - type: bind
+        source: .volumes/php-socket-debug
+        target: /var/run/php-debug
+      - type: bind
+        source: .volumes/php-socket-profile
+        target: /var/run/php-profile
+      - type: bind
+        source: .volumes/php-socket-trace
+        target: /var/run/php-trace
+      - type: bind
+        source: .docker/nginx
+        target: /etc/nginx/templates
+      - type: bind
+        source: .
+        target: /srv
+    environment:
+      NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx
+      NGINX_ENVSUBST_TEMPLATE_SUFFIX: .tmpl
+      ROOT_DOMAIN: ${ROOT_DOMAIN}
+      NGINX_ROOT: /srv
+      FPM_ROOT: /home/warp/app
+      FPM_SENDMAIL: /usr/sbin/sendmail -ti -S host.docker.internal:25
+
+  mysql:
+    restart: unless-stopped
+    image: percona:5.7
+    # For Apple Silicon
+    platform: linux/amd64
+    # For all available flags see: mysqld --verbose --help
+    command:
+      - '--character-set-server=utf8'
+      - '--collation-server=utf8_unicode_ci'
+      - '--max-allowed-packet=32MB'
+      - '--init-connect=SET collation_connection = utf8_general_ci'
+      - '--init-connect=SET NAMES utf8'
+      - '--init-connect=SET innodb_strict_mode=0'
+      - '--sql-mode='
+      - '--sort-buffer-size=256000000'
+    environment:
+      MYSQL_USER: ${DB_USER:-bitrix}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_DATABASE: ${DB_NAME:-bitrix}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
+    volumes:
+      - type: volume
+        source: mysql
+        target: /var/lib/mysql
+      - type: bind
+        source: .volumes/mysql
+        target: /mnt/mysql
+
+  push-pub:
+    profiles:
+      - push
+    restart: unless-stopped
+    image: bitrix_push_server:latest
+    build:
+      context: .docker
+      target: push_server
+      args:
+        ALPINE_REPO: http://mirror.yandex.ru/mirrors/alpine/
+    command: [ 'node', 'start.js', '--config', 'pub.json' ]
+
+  push-sub:
+    profiles:
+      - push
+    restart: unless-stopped
+    image: bitrix_push_server:latest
+    build:
+      context: .docker
+      target: push_server
+      args:
+        ALPINE_REPO: http://mirror.yandex.ru/mirrors/alpine/
+    command: [ 'node', 'start.js', '--config', 'sub.json' ]
+
+  redis:
+    profiles:
+      - push
+    restart: unless-stopped
+    image: redis:6-alpine
+    command: [ 'redis-server', '--appendonly', 'yes' ]
+    volumes:
+      - type: volume
+        source: redis
+        target: /data
+
+volumes:
+  mysql:
+  redis:
+  php-tmp:

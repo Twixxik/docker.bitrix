@@ -1,0 +1,116 @@
+index                   index.php index.html index.htm;
+client_max_body_size    1024m;
+client_body_buffer_size 4m;
+proxy_set_header        X-Real-IP       $remote_addr;
+proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+set                     $php_upstream   php-upstream;
+if ($cookie_XDEBUG_SESSION = 'docker') {
+    set                 $php_upstream   php-debug-upstream;
+}
+if ($cookie_XDEBUG_PROFILE = 'docker') {
+    set                 $php_upstream   php-profile-upstream;
+}
+if ($cookie_XDEBUG_TRACE = 'docker') {
+    set                 $php_upstream   php-trace-upstream;
+}
+
+location / {
+    try_files $uri $uri/ @bitrix;
+}
+
+location /upload/support/not_image {
+    deny all;
+}
+
+location ~* /upload/.*\.(php|php3|php4|php5|php6|phtml|pl|asp|aspx|cgi|dll|exe|shtm|shtml|fcg|fcgi|fpl|asmx|pht|py|psp|rb|var)$ {
+    types {
+        text/plain text/plain php php3 php4 php5 php6 phtml pl asp aspx cgi dll exe ico shtm shtml fcg fcgi fpl asmx pht py psp rb var;
+    }
+}
+
+location ~* ^/upload/1c_[^/]+/ {
+    deny all;
+}
+
+# Use nginx to return static content from s3 cloud storage
+# /upload/bx_cloud_upload/<schema>.<backet_name>.<s3_point>.amazonaws.com/<path/to/file>
+location ^~ /upload/bx_cloud_upload/ {
+    location ~ ^/upload/bx_cloud_upload/(http[s]?)\.([^/:]+)\.(s3|s3-us-west-1|s3-eu-west-1|s3-ap-southeast-1|s3-ap-northeast-1)\.amazonaws\.com/(.+)$ {
+        internal;
+        resolver         1.1.1.1;
+        proxy_method     GET;
+        proxy_pass       $1://$2.$3.amazonaws.com/$4;
+        proxy_set_header X-Forwarded-Server $host;
+    }
+
+    location ~* .*$ {
+        deny all;
+    }
+}
+
+# Deny direct access to vcs repositories
+location ~* /\.(svn|hg|git) {
+    deny all;
+}
+
+# Deny direct access to hidden files (but not directories)
+location ~ /\.[^/]+$ {
+    deny all;
+}
+
+# Deny direct access to bitrix core files
+location ~* ^/(bitrix|local)/(modules|local_cache|stack_cache|managed_cache|php_interface|html_pages) {
+    deny all;
+}
+
+# Accept access for merged css and js
+location ~* ^/bitrix/cache/(css/.+\.css|js/.+\.js)$ {
+    expires 30d;
+}
+
+# Disable access for other assets in cache location
+location /bitrix/cache {
+    deny all;
+}
+
+# Static files
+location ~* \.(jsx?|tsx?|css|less|scss|sass|jpg|jpeg|gif|png|txt|svg|mp3|ogg|mpe?g|avi|zip|gz|bz2?|rar|eot|otf|ttf|woff|woff2|ico)$ {
+    log_not_found off;
+    access_log    off;
+    expires       30d;
+    add_header    Cache-Control public;
+}
+
+# PHP-FPM
+location ~ \.php$ {
+    try_files     $uri @bitrix;
+    fastcgi_pass  $php_upstream;
+    fastcgi_index index.php;
+    include       include/fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $fpm_root$fastcgi_script_name;
+}
+
+location @bitrix {
+    fastcgi_pass  $php_upstream;
+    include       include/fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $fpm_root/bitrix/routing_index.php;
+}
+
+location ~* /bitrix/admin.+\.php$ {
+    try_files     $uri @bitrix_admin;
+    fastcgi_pass  $php_upstream;
+    fastcgi_index index.php;
+    include       include/fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $fpm_root$fastcgi_script_name;
+}
+
+location @bitrix_admin {
+    fastcgi_pass  $php_upstream;
+    include       include/fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $fpm_root/bitrix/admin/404.php;
+}
+
+error_page 404 /404.php;
+location = /404.php {
+    internal;
+}
