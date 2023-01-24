@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+DIR=$(realpath $(dirname -- $(dirname -- "$0")));
+DIRNAME="${DIR##*/}";
+
+cp -f $DIR/.env.example $DIR/.env
+cp -f $DIR/docker-compose.example.yml $DIR/docker-compose.override.yml
+
+sed -i '' "s/project_name/$DIRNAME/g" $DIR/.env
+sed -i '' "s/project_name/$DIRNAME/g" $DIR/docker-compose.override.yml
+
+docker compose up -d

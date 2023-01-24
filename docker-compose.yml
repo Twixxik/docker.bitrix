@@ -152,7 +152,7 @@ services:
       MYSQL_USER: ${DB_USER:-bitrix}
       MYSQL_PASSWORD: ${DB_PASSWORD:-password}
       MYSQL_DATABASE: ${DB_NAME:-bitrix}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-password}
     volumes:
       - type: volume
         source: mysql

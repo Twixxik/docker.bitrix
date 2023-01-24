@@ -2,7 +2,7 @@
 ### Запуск
 Выполните команду в терминале PhpStorm
 ```bash
-docker compose up -d
+bash bin/docker
 ```
 
 ### Разворачиваем бэкап
