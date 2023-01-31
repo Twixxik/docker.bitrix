@@ -65,7 +65,7 @@ services:
     environment:
       NGINX_ENVSUBST_TEMPLATE_SUFFIX: .tmpl
       NGINX_ROOT: /srv
-      PROXY_ADDR: https://project_name.ru/
+      PROXY_ADDR: https://${PROD_DOMAIN}/
     networks:
       - 'default'
       - 'traefik'

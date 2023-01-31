@@ -3,6 +3,11 @@ client_max_body_size    1024m;
 client_body_buffer_size 4m;
 proxy_set_header        X-Real-IP       $remote_addr;
 proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_read_timeout 300;
+proxy_connect_timeout 300;
+proxy_send_timeout 300;
+send_timeout 300;
+
 set                     $php_upstream   php-upstream;
 if ($cookie_XDEBUG_SESSION = 'docker') {
     set                 $php_upstream   php-debug-upstream;
@@ -93,7 +98,7 @@ location ~ \.php$ {
 location @bitrix {
     fastcgi_pass  $php_upstream;
     include       include/fastcgi_params;
-    fastcgi_param SCRIPT_FILENAME $fpm_root/bitrix/routing_index.php;
+    fastcgi_param SCRIPT_FILENAME $fpm_root/bitrix/urlrewrite.php;
 }
 
 location ~* /bitrix/admin.+\.php$ {
