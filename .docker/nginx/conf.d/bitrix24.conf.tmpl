@@ -1,7 +1,0 @@
-server {
-    listen      80;
-    server_name b24.${ROOT_DOMAIN};
-    root        ${NGINX_ROOT}/bitrix24;
-    set         $fpm_root ${FPM_ROOT}/bitrix24;
-    include     include/server_bitrix;
-}

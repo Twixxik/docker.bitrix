@@ -6,13 +6,12 @@ set -o pipefail
 
 DIR=$(realpath $(dirname -- $(dirname -- "$0")));
 
+read -p "Specify project name: " project
 read -p "Specify git repository clone link: " repository
 read -p "Specify branch: " branch
 
 echo "Cloning git repository... "
-git clone ${repository} --branch ${branch} ${DIR}/website
+git clone ${repository} --branch ${branch} ${DIR}/${project}
 echo "Done."
 
-mkdir bitrix upload
-
-docker run --rm --user $UID -v ${DIR}/website:/app composer:2 i --ignore-platform-reqs --prefer-dist
+docker run --rm --user $UID -v ${DIR}/${project}:/app composer:2 i --ignore-platform-reqs --prefer-dist

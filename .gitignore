@@ -57,9 +57,3 @@ bower_components
 
 # Project folders and files to ignore
 docker-compose.override.yml
-/bitrix
-/upload
-/local
-/images
-/website
-/bitrix24

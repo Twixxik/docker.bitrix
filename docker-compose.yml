@@ -3,7 +3,7 @@ version: '3.9'
 services:
   php:
     restart: unless-stopped
-    image: bitrix_php:latest
+    image: bitrix74:latest
     build:
       context: .docker
       target: php_fpm
@@ -26,7 +26,7 @@ services:
     profiles:
       - debug
     restart: unless-stopped
-    image: bitrix_php:latest
+    image: bitrix74:latest
     build:
       context: .docker
       target: php_fpm
@@ -53,7 +53,7 @@ services:
     profiles:
       - debug
     restart: unless-stopped
-    image: bitrix_php:latest
+    image: bitrix74:latest
     build:
       context: .docker
       target: php_fpm
@@ -80,7 +80,7 @@ services:
     profiles:
       - debug
     restart: unless-stopped
-    image: bitrix_php:latest
+    image: bitrix74:latest
     build:
       context: .docker
       target: php_fpm
@@ -149,9 +149,9 @@ services:
       - '--sql-mode='
       - '--sort-buffer-size=256000000'
     environment:
-      MYSQL_USER: ${DB_USER:-bitrix}
+      MYSQL_USER: ${DB_USER:-bitrix74}
       MYSQL_PASSWORD: ${DB_PASSWORD:-password}
-      MYSQL_DATABASE: ${DB_NAME:-bitrix}
+      MYSQL_DATABASE: ${DB_NAME:-bitrix74}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-password}
     volumes:
       - type: volume

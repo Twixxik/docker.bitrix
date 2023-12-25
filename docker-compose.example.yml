@@ -19,10 +19,10 @@ services:
       - 'traefik'
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.services.project_name-nginx.loadbalancer.server.port=80'
-      - 'traefik.http.routers.project_name-nginx.service=project_name-nginx'
-      - 'traefik.http.routers.project_name-nginx.rule=HostRegexp(`${ROOT_DOMAIN}`, `{subdomain:.*}.${ROOT_DOMAIN}`)'
-      - 'traefik.http.routers.project_name-nginx.priority=50'
+      - 'traefik.http.services.bitrix74-nginx.loadbalancer.server.port=80'
+      - 'traefik.http.routers.bitrix74-nginx.service=bitrix74-nginx'
+      - 'traefik.http.routers.bitrix74-nginx.rule=HostRegexp(`${ROOT_DOMAIN}`, `{subdomain:.*}.${ROOT_DOMAIN}`)'
+      - 'traefik.http.routers.bitrix74-nginx.priority=50'
     environment:
       FPM_SENDMAIL: /usr/sbin/sendmail -ti -S mailhog:1025
 
@@ -32,10 +32,10 @@ services:
       - 'traefik'
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.services.project_name-push-sub.loadbalancer.server.port=3000'
-      - 'traefik.http.routers.project_name-push-sub.service=project_name-push-sub'
-      - 'traefik.http.routers.project_name-push-sub.rule=Host(`sub.${ROOT_DOMAIN}`)'
-      - 'traefik.http.routers.project_name-push-sub.priority=100'
+      - 'traefik.http.services.bitrix74-push-sub.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.bitrix74-push-sub.service=bitrix74-push-sub'
+      - 'traefik.http.routers.bitrix74-push-sub.rule=Host(`sub.${ROOT_DOMAIN}`)'
+      - 'traefik.http.routers.bitrix74-push-sub.priority=100'
 
   mailhog:
     restart: unless-stopped
@@ -45,40 +45,14 @@ services:
       - 'traefik'
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.services.project_name-mailhog.loadbalancer.server.port=8025'
-      - 'traefik.http.routers.project_name-mailhog.service=project_name-mailhog'
-      - 'traefik.http.routers.project_name-mailhog.rule=Host(`mail.${ROOT_DOMAIN}`)'
-      - 'traefik.http.routers.project_name-mailhog.priority=100'
-
-  upload:
-    profiles:
-      - upload
-    restart: unless-stopped
-    image: nginx:alpine
-    volumes:
-      - type: bind
-        source: .docker/upload
-        target: /etc/nginx/templates
-      - type: bind
-        source: ./upload
-        target: /srv/upload
-    environment:
-      NGINX_ENVSUBST_TEMPLATE_SUFFIX: .tmpl
-      NGINX_ROOT: /srv
-      PROXY_ADDR: https://${PROD_DOMAIN}/
-    networks:
-      - 'default'
-      - 'traefik'
-    labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.services.project_name-upload.loadbalancer.server.port=80'
-      - 'traefik.http.routers.project_name-upload.service=project_name-upload'
-      - 'traefik.http.routers.project_name-upload.rule=HostRegexp(`${ROOT_DOMAIN}`, `{subdomain:.*}.${ROOT_DOMAIN}`) && PathPrefix(`/upload/`)'
-      - 'traefik.http.routers.project_name-upload.priority=60'
+      - 'traefik.http.services.bitrix74-mailhog.loadbalancer.server.port=8025'
+      - 'traefik.http.routers.bitrix74-mailhog.service=bitrix74-mailhog'
+      - 'traefik.http.routers.bitrix74-mailhog.rule=Host(`mail.${ROOT_DOMAIN}`)'
+      - 'traefik.http.routers.bitrix74-mailhog.priority=100'
 
   mysql:
     ports:
-      - '49361:3306'
+      - '49374:3306'
 
 networks:
   traefik:

@@ -62,7 +62,7 @@ WORKDIR /home/warp/app
 USER warp
 
 # Inspired by: https://github.com/ikarpovich/bitrix-push-server
-FROM node:lts-alpine AS push_server
+FROM node:16-alpine AS push_server
 
 ARG ALPINE_REPO=http://dl-cdn.alpinelinux.org/alpine/
 RUN sed -i -r 's#^http.+/(.+/main)#'${ALPINE_REPO%/}'/\1#' /etc/apk/repositories \

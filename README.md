@@ -10,22 +10,11 @@ bash bin/docker
     ```bash
     bash bin/init
     ```
-   или ручками помещаем проект в папку `/website`
 
-
-2. Создаем симлинки на папки bitrix, local и upload
-    ```bash
-    bash bin/symlinks
-    ```
-3. Разворачиваем БД. Нам нужен дамп базы. Используйте [bxdump](https://github.com/Twixxik/bxdump) и закиньте sql файлы из архива в `.volumes/mysql`, затем запустите команду
+2. Разворачиваем БД. Нам нужен дамп базы. Используйте [bxdump](https://github.com/Twixxik/bxdump) и закиньте sql файлы из архива в `.volumes/mysql`, затем запустите команду
     ```bash
     bash bin/mysql
     ```
-### Авторизация за админа
-Если вы не знаете пароль от админа, используется следующую команду
-```bash
-bash bin/login
-```
 
 ### Настраиваем PhpStorm
 
@@ -36,14 +25,15 @@ bash bin/login
 /local
 /images
 /upload
-/website/bitrix
-/website/upload
+/vendor
 ```
 
 И добавьте эти папки в индекс для поиска по ним, перейдите в "Settings -> PHP -> Include Path".
 ```
 /bitrix/modules
 /bitrix/components
+/bitrix/js
+/bitrix/css
 ```
 
 ### Debug and Profiling
